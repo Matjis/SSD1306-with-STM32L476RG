@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+//#include "oled.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -44,6 +45,7 @@ I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
 /* USER CODE BEGIN PV */
+SSD1306_t disp;
 
 /* USER CODE END PV */
 
@@ -96,6 +98,7 @@ int main(void)
   // Initialise display
   SSD1306_Initialise(&disp, &hi2c2);
 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,6 +107,8 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	 // ADXL345_ReadAccelerations(&acc); executable code
+
+	  //SSD1306_Puts ("Embedded", &Font_7x10, 1);
 
     /* USER CODE BEGIN 3 */
   }
