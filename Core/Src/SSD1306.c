@@ -7,6 +7,7 @@
 
 #include "SSD1306.h"
 #include "main.h"
+#include <string.h> // where memset prototype can be found
 
 uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle){
 
@@ -17,18 +18,9 @@ uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle){
 	uint8_t errNum = 0;
 	HAL_StatusTypeDef status;
 
-	/* status = SSD1306_WriteRegister(dev, SSD1306_REG_ENTIRE_DISPLAY_ON_NO_RAM);
-	errNum += (status != HAL_OK);
-	*/
+	//SSD1306_GotoXY (0,0);*/
 
-	status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_ON);
-	errNum += (status != HAL_OK);
-
-	/*SSD1306_Init();
-	SSD1306_GotoXY (0,0);*/
-
-	status = SSD1306_WriteCommand(dev, 0xAE); //display off
-		errNum += (status != HAL_OK);
+	status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_OFF); //display off
 		status = SSD1306_WriteCommand(dev, 0x20); //Set Memory Addressing Mode
 		status = SSD1306_WriteCommand(dev, 0x10); //00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
 		status = SSD1306_WriteCommand(dev, 0xB0); //Set Page Start Address for Page Addressing Mode,0-7
@@ -55,19 +47,22 @@ uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle){
 		status = SSD1306_WriteCommand(dev, 0x20); //0x20,0.77xVcc
 		status = SSD1306_WriteCommand(dev, 0x8D); //--set DC-DC enable
 		status = SSD1306_WriteCommand(dev, 0x14); //
-		status = SSD1306_WriteCommand(dev, 0xAF); //--turn on SSD1306 panel
+		status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_ON); //--turn on SSD1306 panel
 	errNum += (status != HAL_OK);
 	// Return number of errors (0 if successful initialisation)
 
-
-	//static char SSD1306_BUFFER[SSD1306_WIDTH*SSD1306_HEIGHT/8];
-	memset(dev->BUFFER, 0x00, sizeof(dev->BUFFER));
-	status = SSD1306_WriteData(dev, dev->BUFFER);
-	errNum += (status != HAL_OK);
-
+	memset(dev->BUFFER, 0x11, sizeof(dev->BUFFER));
+	for(uint8_t i=0; i < SSD1306_HEIGHT/8; i++){
+	status = SSD1306_WriteCommand(dev, 0xB0+i);	//	iterates through page start addresses
+	status = SSD1306_WriteCommand(dev, 0x00);	// ??? can it be used without it?
+	status = SSD1306_WriteCommand(dev, 0x10);	// ??? can it be used without it?
+	status = SSD1306_WriteData(dev, &dev->BUFFER[SSD1306_WIDTH*i]);
+	}
 
 	return errNum;
 }
+
+uint8_t SSD1306_ScreenUpdate();
 
 /*
 HAL_StatusTypeDef SSD1306_ReadRegister(SSD1306_t *dev, uint8_t *data){
@@ -75,19 +70,19 @@ HAL_StatusTypeDef SSD1306_ReadRegister(SSD1306_t *dev, uint8_t *data){
 	return HAL_I2C_Mem_Read(dev->i2cHandle, SSD1306_I2C_ADDR, SSD1306_REG_COMMAND, I2C_MEMADD_SIZE_8BIT, data, 1, HAL_MAX_DELAY);
 }
 
-HAL_StatusTypeDef SSD1306_ReadRegisters(SSD1306_t *dev, uint8_t reg, uint8_t *data, uint8_t lenght){
+HAL_StatusTypeDef SSD1306_ReadRegisters(SSD1306_t *dev, uint8_t reg, uint8_t *data, uint8_t length){
 
-	return HAL_I2C_Mem_Read(dev->i2cHandle, SSD1306_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, data, lenght, HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Read(dev->i2cHandle, SSD1306_I2C_ADDR, reg, I2C_MEMADD_SIZE_8BIT, data, length, HAL_MAX_DELAY);
 }
 */
 
-HAL_StatusTypeDef SSD1306_WriteCommand(SSD1306_t *dev, uint8_t data){
+HAL_StatusTypeDef SSD1306_WriteCommand(SSD1306_t *dev, uint8_t command){
 
-	return HAL_I2C_Mem_Write(dev->i2cHandle, SSD1306_I2C_ADDR, SSD1306_COMMAND, I2C_MEMADD_SIZE_8BIT, &data, 1, HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Write(dev->i2cHandle, SSD1306_I2C_ADDR, SSD1306_COMMAND, I2C_MEMADD_SIZE_8BIT, &command, 1, HAL_MAX_DELAY);
 }
 
-HAL_StatusTypeDef SSD1306_WriteData(SSD1306_t *dev, uint8_t data){
+HAL_StatusTypeDef SSD1306_WriteData(SSD1306_t *dev, uint8_t *data){
 
-	return HAL_I2C_Mem_Write(dev->i2cHandle, SSD1306_I2C_ADDR, SSD1306_DATA, I2C_MEMADD_SIZE_8BIT, &data, 8, HAL_MAX_DELAY);
+	return HAL_I2C_Mem_Write(dev->i2cHandle, SSD1306_I2C_ADDR, SSD1306_DATA, I2C_MEMADD_SIZE_8BIT, data, SSD1306_WIDTH, HAL_MAX_DELAY);
 }
 

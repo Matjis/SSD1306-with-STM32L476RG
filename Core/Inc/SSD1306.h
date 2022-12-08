@@ -22,13 +22,15 @@
 
 // REGISTERS
 
-
-
 #define SSD1306_REG_ENTIRE_DISPLAY_ON_RAM		0xA4
 #define SSD1306_REG_ENTIRE_DISPLAY_ON_NO_RAM	0xA5
 
 #define SSD1306_REG_DISPLAY_ON					0xAF	// Turn on SSD1306 panel
 #define SSD1306_REG_DISPLAY_OFF					0xAE	// Turn off SSD1306 panel
+
+#define SSD1306_REG_LOW_COL						0x00	//	Set lower column start address
+#define SSD1306_REG_HIGH_COL					0x10	//	Set higher column start address
+//#define SSD1306_REG_							0x00	//
 
 
 // DISPLAY PARAMETERS
@@ -46,17 +48,21 @@ typedef struct{
 
 }SSD1306_t;
 
+
 // INITIALISATION
 
 uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle);
 
+// FUNCTIONALITY
+uint8_t SSD1306_ScreenUpdate();
+
 // LOW-LEVEL FUNCTIONS
 
 HAL_StatusTypeDef SSD1306_ReadRegister(SSD1306_t *dev, uint8_t *data);
-HAL_StatusTypeDef SSD1306_ReadRegisters(SSD1306_t *dev, uint8_t reg, uint8_t *data, uint8_t lenght);
+HAL_StatusTypeDef SSD1306_ReadRegisters(SSD1306_t *dev, uint8_t reg, uint8_t *data, uint8_t length);
 
 //HAL_StatusTypeDef SSD1306_WriteRegister(SSD1306_t *dev, uint8_t ComOrData, uint8_t data);
-HAL_StatusTypeDef SSD1306_WriteCommand(SSD1306_t *dev, uint8_t data);
-HAL_StatusTypeDef SSD1306_WriteData(SSD1306_t *dev, uint8_t data);
+HAL_StatusTypeDef SSD1306_WriteCommand(SSD1306_t *dev, uint8_t command);
+HAL_StatusTypeDef SSD1306_WriteData(SSD1306_t *dev, uint8_t* data);
 
 #endif /* SSD1306_H_ */
