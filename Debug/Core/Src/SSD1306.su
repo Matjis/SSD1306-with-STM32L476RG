@@ -1,3 +1,4 @@
-../Core/Src/SSD1306.c:12:9:SSD1306_Initialise	24	static
-../Core/Src/SSD1306.c:79:19:SSD1306_WriteCommand	32	static
-../Core/Src/SSD1306.c:84:19:SSD1306_WriteData	32	static
+../Core/Src/SSD1306.c:13:9:SSD1306_Initialise	24	static
+../Core/Src/SSD1306.c:68:6:SSD1306_ScreenUpdate	24	static
+../Core/Src/SSD1306.c:96:19:SSD1306_WriteCommand	32	static
+../Core/Src/SSD1306.c:101:19:SSD1306_WriteData	32	static

@@ -22,14 +22,19 @@
 
 // REGISTERS
 
-#define SSD1306_REG_ENTIRE_DISPLAY_ON_RAM		0xA4
-#define SSD1306_REG_ENTIRE_DISPLAY_ON_NO_RAM	0xA5
+#define SSD1306_REG_ENTIRE_DISPLAY_ON_RAM		0xA4	// Show RAM content on display
+#define SSD1306_REG_ENTIRE_DISPLAY_ON_NO_RAM	0xA5	// Forces the entire display ON regardless of RAM content
+
+#define SSD1306_REG_DISPLAY_NORMAL				0xA6	//	RAM data value of 1 indicates ON pixel
+#define SSD1306_REG_DISPLAY_INVERSE				0xA7	//	RAM data value of 0 indicates ON pixel
 
 #define SSD1306_REG_DISPLAY_ON					0xAF	// Turn on SSD1306 panel
 #define SSD1306_REG_DISPLAY_OFF					0xAE	// Turn off SSD1306 panel
 
 #define SSD1306_REG_LOW_COL						0x00	//	Set lower column start address
 #define SSD1306_REG_HIGH_COL					0x10	//	Set higher column start address
+
+
 //#define SSD1306_REG_							0x00	//
 
 
@@ -54,7 +59,7 @@ typedef struct{
 uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle);
 
 // FUNCTIONALITY
-uint8_t SSD1306_ScreenUpdate();
+void SSD1306_ScreenUpdate(SSD1306_t *dev);
 
 // LOW-LEVEL FUNCTIONS
 

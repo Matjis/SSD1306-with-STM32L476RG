@@ -8,6 +8,7 @@
 #include "SSD1306.h"
 #include "main.h"
 #include <string.h> // where memset prototype can be found
+#include "horse_anim.h"
 
 uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle){
 
@@ -18,51 +19,68 @@ uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle){
 	uint8_t errNum = 0;
 	HAL_StatusTypeDef status;
 
-	//SSD1306_GotoXY (0,0);*/
 
-	status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_OFF); //display off
-		status = SSD1306_WriteCommand(dev, 0x20); //Set Memory Addressing Mode
-		status = SSD1306_WriteCommand(dev, 0x10); //00,Horizontal Addressing Mode;01,Vertical Addressing Mode;10,Page Addressing Mode (RESET);11,Invalid
-		status = SSD1306_WriteCommand(dev, 0xB0); //Set Page Start Address for Page Addressing Mode,0-7
-		status = SSD1306_WriteCommand(dev, 0xC8); //Set COM Output Scan Direction
-		status = SSD1306_WriteCommand(dev, 0x00); //---set low column address
-		status = SSD1306_WriteCommand(dev, 0x10); //---set high column address
-		status = SSD1306_WriteCommand(dev, 0x40); //--set start line address
-		status = SSD1306_WriteCommand(dev, 0x81); //--set contrast control register
-		status = SSD1306_WriteCommand(dev, 0xFF);
-		status = SSD1306_WriteCommand(dev, 0xA1); //--set segment re-map 0 to 127
-		status = SSD1306_WriteCommand(dev, 0xA6); //--set normal display
-		status = SSD1306_WriteCommand(dev, 0xA8); //--set multiplex ratio(1 to 64)
-		status = SSD1306_WriteCommand(dev, 0x3F); //
-		status = SSD1306_WriteCommand(dev, 0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
-		status = SSD1306_WriteCommand(dev, 0xD3); //-set display offset
-		status = SSD1306_WriteCommand(dev, 0x00); //-not offset
-		status = SSD1306_WriteCommand(dev, 0xD5); //--set display clock divide ratio/oscillator frequency
-		status = SSD1306_WriteCommand(dev, 0xF0); //--set divide ratio
-		status = SSD1306_WriteCommand(dev, 0xD9); //--set pre-charge period
-		status = SSD1306_WriteCommand(dev, 0x22); //
-		status = SSD1306_WriteCommand(dev, 0xDA); //--set com pins hardware configuration
-		status = SSD1306_WriteCommand(dev, 0x12);
-		status = SSD1306_WriteCommand(dev, 0xDB); //--set vcomh
-		status = SSD1306_WriteCommand(dev, 0x20); //0x20,0.77xVcc
-		status = SSD1306_WriteCommand(dev, 0x8D); //--set DC-DC enable
-		status = SSD1306_WriteCommand(dev, 0x14); //
-		status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_ON); //--turn on SSD1306 panel
+		status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_OFF); //! Display off
+
+		status = SSD1306_WriteCommand(dev, 0xA8); // Double byte command! Set multiplex ratio (1 to 64).
+		status = SSD1306_WriteCommand(dev, 0x3F); // Sets that picture on display starts from top. Permitted entries are between 0x0F - 0x3f as per 0xA8 register describes. Smaller value sets screen start lower. As per datasheet Table 10-1 and 10-2 shows few options.
+
+		status = SSD1306_WriteCommand(dev, 0xD3); // Double byte command! Set display offset.
+		status = SSD1306_WriteCommand(dev, 0x00); // After 0xD3 command the offset can be set with this command value. Value can range from 0x00 - 0x3F. Default value after RESET is 0x00.
+
+		status = SSD1306_WriteCommand(dev, 0x40); // Set display start line. Value can range from 0x40 - 0x7F. 0x40 is equal to line 0 and 0x7F will be equal to line 63.
+
+		status = SSD1306_WriteCommand(dev, 0xA1); // Set segment re-map. Value can be A0 or A1.
+		status = SSD1306_WriteCommand(dev, 0xC8); // Set COM output scan direction. Value can be C0 or C8.
+
+		status = SSD1306_WriteCommand(dev, 0xDA); // Double byte command! Set COM pins hardware configuration.
+		status = SSD1306_WriteCommand(dev, 0x12); // 0x12 uses 8 pages, if you set 0x02, than only 4 pages are represented on display.
+
+		status = SSD1306_WriteCommand(dev, 0x81); // Double byte command! Set contrast control register.
+		status = SSD1306_WriteCommand(dev, 0x7F); // After 0x81 command this value sets contrast. Value can range from 0x00 - 0xFF. Default value after RESET is 0x7F.
+
+		status = SSD1306_WriteCommand(dev, SSD1306_REG_ENTIRE_DISPLAY_ON_RAM); //! Set display to take data from RAM or ignore RAM data and just be ON.
+		status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_NORMAL); //! Set display state to normal or inverse.
+
+		status = SSD1306_WriteCommand(dev, 0xD5); // Double byte command! Set display clock divide ratio/oscillator frequency.
+		status = SSD1306_WriteCommand(dev, 0xF0); // Consists of 2 parts: lower 2 bytes sets divide ratio, higher 2 bytes set oscillator frequency. Default value for divide ratio: 0x00, default value for oscillator frequency: 0x08. End value can be set this way (0x08 << 4) | 0x00 and then you get 0x80. How D5h values work can be seen in datasheet. Fosc is set to max value for speed purposes.
+
+		status = SSD1306_WriteCommand(dev, 0x8D); // Double byte command! Charge pump setting up.
+		status = SSD1306_WriteCommand(dev, 0x14); // Enable charge pump.
+
+		status = SSD1306_WriteCommand(dev, SSD1306_REG_DISPLAY_ON); // Set entire display ON
+
 	errNum += (status != HAL_OK);
 	// Return number of errors (0 if successful initialisation)
 
-	memset(dev->BUFFER, 0x11, sizeof(dev->BUFFER));
-	for(uint8_t i=0; i < SSD1306_HEIGHT/8; i++){
-	status = SSD1306_WriteCommand(dev, 0xB0+i);	//	iterates through page start addresses
-	status = SSD1306_WriteCommand(dev, 0x00);	// ??? can it be used without it?
-	status = SSD1306_WriteCommand(dev, 0x10);	// ??? can it be used without it?
-	status = SSD1306_WriteData(dev, &dev->BUFFER[SSD1306_WIDTH*i]);
-	}
+	memset(dev->BUFFER, 0x12, sizeof(dev->BUFFER)); //
+	/*dev->BUFFER[2]= 0xFF;
+	dev->BUFFER[4]= 0x0F;
+	dev->BUFFER[6]= 0xF0;
+	dev->BUFFER[16]= 0x10;
+	dev->BUFFER[32]= 0x90;
+	dev->BUFFER[127]= 0xBB; */
+	//SSD1306_ScreenUpdate(dev);
 
 	return errNum;
 }
 
-uint8_t SSD1306_ScreenUpdate();
+void SSD1306_ScreenUpdate(SSD1306_t *dev){
+
+	//SSD1306_GotoXY (0,0);*/
+
+	//Few pictures to test screen.
+	for(uint8_t i=0; i < SSD1306_HEIGHT/8; i++){
+
+		SSD1306_WriteCommand(dev, 0xB0+i);	//	iterates through page start addresses
+		SSD1306_WriteCommand(dev, 0x00);	// ??? can it be used without it?
+		SSD1306_WriteCommand(dev, 0x10);	// ??? can it be used without it?
+		//SSD1306_WriteData(dev, &dev->BUFFER[SSD1306_WIDTH*i]);
+		//SSD1306_WriteData(dev, &horse1[SSD1306_WIDTH*i]);
+		SSD1306_WriteData(dev, &CLOWN1[SSD1306_WIDTH*i]);
+
+	}
+}
 
 /*
 HAL_StatusTypeDef SSD1306_ReadRegister(SSD1306_t *dev, uint8_t *data){
