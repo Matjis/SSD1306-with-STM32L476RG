@@ -48,8 +48,12 @@
 
 typedef struct{
 
-	I2C_HandleTypeDef *i2cHandle;
-	char BUFFER[SSD1306_WIDTH*SSD1306_HEIGHT/8];
+	I2C_HandleTypeDef *i2cHandle;	// Place where to store i2c Handler
+	char BUFFER[SSD1306_WIDTH*SSD1306_HEIGHT/8]; // Place to store all pixel values for display
+	uint8_t PosX;	// X (horizontal) position on screen (0 to SSD1306_WIDTH -1)
+	uint8_t PosY;	// Y (vertical) position on screen	 (0 to SSD1306_HEIGHT -1)
+	uint8_t BitmapWidth;
+	uint8_t BitmapHeight;
 
 }SSD1306_t;
 
@@ -60,6 +64,8 @@ uint8_t	SSD1306_Initialise(SSD1306_t *dev, I2C_HandleTypeDef *i2cHandle);
 
 // FUNCTIONALITY
 void SSD1306_ScreenUpdate(SSD1306_t *dev);
+void SSD13066_DrawPixel(SSD1306_t *dev);
+void SSD13066_DrawBitmap(SSD1306_t *dev);
 
 // LOW-LEVEL FUNCTIONS
 

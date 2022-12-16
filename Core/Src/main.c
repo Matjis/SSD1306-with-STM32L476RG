@@ -110,7 +110,6 @@ int main(void)
 
 	  //SSD1306_Puts ("Embedded", &Font_7x10, 1);
 
-	 //memset(&SSD1306_t->BUFFER, 0xFC, sizeof(&SSD1306_t->BUFFER)); // doesn't work?
 	  SSD1306_ScreenUpdate(&disp);
     /* USER CODE BEGIN 3 */
   }

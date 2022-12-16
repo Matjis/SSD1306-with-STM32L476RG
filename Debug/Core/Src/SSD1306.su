@@ -1,4 +1,6 @@
 ../Core/Src/SSD1306.c:13:9:SSD1306_Initialise	24	static
-../Core/Src/SSD1306.c:68:6:SSD1306_ScreenUpdate	24	static
-../Core/Src/SSD1306.c:96:19:SSD1306_WriteCommand	32	static
-../Core/Src/SSD1306.c:101:19:SSD1306_WriteData	32	static
+../Core/Src/SSD1306.c:82:6:SSD1306_ScreenUpdate	24	static
+../Core/Src/SSD1306.c:102:6:SSD13066_DrawPixel	24	static
+../Core/Src/SSD1306.c:110:6:SSD13066_DrawBitmap	24	static
+../Core/Src/SSD1306.c:151:19:SSD1306_WriteCommand	32	static
+../Core/Src/SSD1306.c:156:19:SSD1306_WriteData	32	static
